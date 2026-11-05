@@ -13,8 +13,8 @@ PWA die je vertelt wanneer je ketting gewaxt moet worden, op basis van je Strava
 2. **Vercel-project** aanmaken, repo koppelen, domein `chainline.cc` toevoegen.
 3. **Neon** via Vercel Marketplace (Storage → Neon). Dat zet `DATABASE_URL`.
 4. **Secrets genereren**: `pnpm gen:secrets` en de output in Vercel env vars zetten (Production + Preview), samen met `APP_URL=https://chainline.cc`, `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, `VAPID_SUBJECT=mailto:<jouw mail>` en `ALLOWED_ATHLETE_IDS=<jouw Strava athlete-id>`.
-5. **Database migreren**: `vercel env pull .env.local` en dan `pnpm db:migrate` (draait `drizzle/*.sql` tegen Neon).
-6. **Deployen**, daarna de **webhook aanmelden**: `pnpm strava:subscribe create` (met `APP_URL=https://chainline.cc` in `.env.local`). Zet het teruggegeven id als `STRAVA_SUBSCRIPTION_ID` en redeploy.
+5. **Database**: migraties draaien automatisch tijdens elke productie-deploy (`scripts/migrate-on-deploy.mjs`, via `DATABASE_URL_UNPOOLED`). Preview- en lokale builds slaan dit over.
+6. **Webhook aanmelden**: log in op `https://chainline.cc`, ga naar `/admin` (alleen voor atleten op `ALLOWED_ATHLETE_IDS`) en klik op *Webhook aanmelden*. Zet het getoonde id als `STRAVA_SUBSCRIPTION_ID` in Vercel en redeploy. (Lokaal alternatief: `pnpm strava:subscribe create`.)
 7. **Strava-knop**: download de officiële "Connect with Strava"-knop en het "Powered by Strava"-logo van <https://developers.strava.com/guidelines/> en vervang de tijdelijke knop/tekst in `src/app/page.tsx`.
 
 ## Lokaal

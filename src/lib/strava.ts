@@ -161,3 +161,35 @@ export function nearRateLimit(): boolean {
   return lastUsage.shortUsage >= lastUsage.shortLimit * stravaConfig.backfillUsageCeiling ||
     lastUsage.dailyUsage >= lastUsage.dailyLimit * stravaConfig.backfillUsageCeiling
 }
+
+// ---- Webhook-subscription (app-niveau, met client credentials) ----
+
+export interface StravaSubscription {
+  id: number
+  callback_url: string
+  created_at?: string
+}
+
+function clientCreds() {
+  const e = env()
+  return { client_id: e.STRAVA_CLIENT_ID, client_secret: e.STRAVA_CLIENT_SECRET }
+}
+
+export async function listSubscriptions(): Promise<StravaSubscription[]> {
+  const res = await fetch(`${env().STRAVA_API_BASE_URL}/push_subscriptions?${new URLSearchParams(clientCreds())}`, { cache: 'no-store' })
+  if (!res.ok) throw new Error(`Subscriptions ophalen faalde: ${res.status}`)
+  return (await res.json()) as StravaSubscription[]
+}
+
+/** Strava valideert de callback meteen met een GET naar onze webhook; die moet dus live zijn. */
+export async function createSubscription(): Promise<{ ok: true; id: number } | { ok: false; error: string }> {
+  const e = env()
+  const res = await fetch(`${e.STRAVA_API_BASE_URL}/push_subscriptions`, {
+    method: 'POST',
+    body: new URLSearchParams({ ...clientCreds(), callback_url: `${e.APP_URL}/api/strava/webhook`, verify_token: e.STRAVA_WEBHOOK_VERIFY_TOKEN }),
+    cache: 'no-store',
+  })
+  const text = await res.text()
+  if (!res.ok) return { ok: false, error: `${res.status}: ${text.slice(0, 300)}` }
+  return { ok: true, id: (JSON.parse(text) as { id: number }).id }
+}
