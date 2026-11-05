@@ -5,6 +5,15 @@ import { fmtDate, nl } from '@/lib/format'
 import type { ComponentView } from '@/server/state'
 import { Ring } from './Ring'
 
+function MiniBar({ value, threshold, status }: { value: number | null | undefined; threshold: number; status: RuleStatus }) {
+  const pct = value == null ? 0 : Math.min(100, (value / threshold) * 100)
+  return (
+    <div className="bar" aria-hidden>
+      <span className={status} style={{ width: `${pct}%` }} />
+    </div>
+  )
+}
+
 const RANK: Record<RuleStatus, number> = { due: 3, warning: 2, ok: 1, no_data: 0, not_mounted: 0 }
 
 /** Zwaarste status van alle regels op de fiets: bepaalt de kleur van de strip. */
@@ -27,10 +36,9 @@ export function BikeCard({ name, comps, backfilling, children }: { name: string;
   const wear = chain && findRule(chain.state, 'measurement')
   const measure = chain && findRule(chain.state, 'km', 'measured')
   const life = cassette && findRule(cassette.state, 'km', null)
-  const status = chain ? worstStatus(comps) : 'setup'
 
   return (
-    <section className={`bike-card s-${status}`}>
+    <section className="bike-card">
       <div className="bike-head">
         <div>
           <h2>{name}</h2>
@@ -64,17 +72,20 @@ export function BikeCard({ name, comps, backfilling, children }: { name: string;
             <a className="stat" href={`/onderdeel/${chain.id}#meten`}>
               <div className="stat-label">Slijtage</div>
               <div className={`stat-value ${wear?.status === 'warning' || wear?.status === 'due' ? wear.status : ''}`}>{wear?.value != null ? `${nl(wear.value, 2)}%` : 'Meten'}</div>
+              {wear && <MiniBar value={wear.value} threshold={wear.threshold} status={wear.status} />}
             </a>
             <a className="stat" href={`/onderdeel/${chain.id}#meten`}>
               <div className="stat-label">Meten over</div>
               <div className={`stat-value ${measure?.status === 'due' ? 'warning' : ''}`}>
                 {measure ? (measure.status === 'due' || wear?.value == null ? 'Nu' : <>{nl(Math.max(0, measure.threshold - (measure.value ?? 0)))}<small>km</small></>) : '—'}
               </div>
+              {measure && <MiniBar value={measure.value} threshold={measure.threshold} status={measure.status} />}
             </a>
             {cassette && life ? (
               <a className="stat" href={`/onderdeel/${cassette.id}`}>
                 <div className="stat-label">Cassette</div>
                 <div className={`stat-value ${life.status === 'warning' || life.status === 'due' ? life.status : ''}`}>{nl(life.value ?? 0)}<small>km</small></div>
+                <MiniBar value={life.value} threshold={life.threshold} status={life.status} />
               </a>
             ) : (
               <div className="stat">

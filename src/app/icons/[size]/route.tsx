@@ -16,7 +16,7 @@ export async function GET(_req: Request, ctx: RouteContext<'/icons/[size]'>) {
       <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#111111' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ width: 34 * u, height: 22 * u, borderRadius: 11 * u, border: `${6 * u}px solid #f5f5f5` }} />
-          <div style={{ width: 34 * u, height: 22 * u, borderRadius: 11 * u, border: `${6 * u}px solid #ff6a1a`, marginLeft: -10 * u }} />
+          <div style={{ width: 34 * u, height: 22 * u, borderRadius: 11 * u, border: `${6 * u}px solid #3b66f0`, marginLeft: -10 * u }} />
         </div>
       </div>
     ),

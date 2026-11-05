@@ -11,12 +11,10 @@
   --muted: #6e6e73;
   --line: #e2e2e7;
   --ok: #24b35a;
-  --ok-2: #b8d61a;
   --warn: #f2a516;
-  --warn-2: #ffd23f;
   --due: #f0442f;
-  --due-2: #ff8a3d;
-  --accent: #ff6a1a;
+  --accent: #2b55e0;
+  --accent-soft: rgba(43, 85, 224, 0.14);
   --strava: #fc5200;
   --pill-bg: #0b0b0d;
   --pill-text: #ffffff;
@@ -34,6 +32,8 @@
     --text: #f4f5f7;
     --muted: #8d92a1;
     --line: #2b2f3a;
+    --accent: #5b82ff;
+    --accent-soft: rgba(91, 130, 255, 0.18);
     --pill-bg: #f4f5f7;
     --pill-text: #0b0b0d;
   }
@@ -92,14 +92,7 @@ main.stack { gap: 20px; }
 .back::before { content: ''; width: 11px; height: 11px; border-left: 2.5px solid currentColor; border-bottom: 2.5px solid currentColor; transform: translateX(2px) rotate(45deg); }
 
 /* ---- Fietskaart: statusstrip, ring, grote cijfers ---- */
-.bike-card { position: relative; background: var(--card); border-radius: var(--radius); padding: 20px 18px 18px 26px; overflow: hidden; }
-.bike-card::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 7px;
-  background: linear-gradient(180deg, var(--ok-2), var(--ok));
-}
-.bike-card.s-warning::before { background: linear-gradient(180deg, var(--warn-2), var(--warn)); }
-.bike-card.s-due::before { background: linear-gradient(180deg, var(--due-2), var(--due)); }
-.bike-card.s-setup::before { background: var(--line); }
+.bike-card { background: var(--card); border-radius: var(--radius); padding: 20px 18px 18px; }
 .bike-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
 .bike-head .sub { color: var(--muted); font-size: 15px; margin: 4px 0 0; }
 .chev { color: var(--muted); text-decoration: none; font-size: 26px; line-height: 1; padding: 2px 4px; }
@@ -107,7 +100,7 @@ main.stack { gap: 20px; }
 .hero { display: flex; align-items: center; gap: 16px; margin: 18px 0 4px; text-decoration: none; }
 .ring { width: 76px; height: 76px; flex: 0 0 auto; transform: rotate(-90deg); }
 .ring .track { stroke: var(--card-2); }
-.ring .fill { transition: stroke-dashoffset 0.6s ease; stroke: var(--ok); }
+.ring .fill { transition: stroke-dashoffset 0.6s ease; stroke: var(--accent); }
 .ring .fill.warning { stroke: var(--warn); } .ring .fill.due { stroke: var(--due); }
 .hero-label { font-size: 13px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
 .big { font-size: 40px; font-weight: 750; letter-spacing: -0.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
@@ -119,11 +112,13 @@ main.stack { gap: 20px; }
 .stat-value small { font-size: 13px; font-weight: 600; color: var(--muted); margin-left: 2px; }
 .stat-value { white-space: nowrap; font-size: 19px; font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .stat-value.warning { color: var(--warn); } .stat-value.due { color: var(--due); }
+.stat .bar { height: 4px; margin-top: 8px; }
 .meta { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
 
 /* ---- Statuslabels ---- */
 .pill { font-size: 13px; font-weight: 650; padding: 4px 10px; border-radius: 999px; color: #fff; white-space: nowrap; flex: 0 0 auto; }
-:is(.pill, .dot, .bar > span).ok { background: var(--ok); }
+:is(.pill, .dot).ok { background: var(--ok); }
+.bar > span.ok { background: var(--accent); }
 :is(.pill, .dot, .bar > span).warning { background: var(--warn); }
 :is(.pill, .dot, .bar > span).due { background: var(--due); }
 :is(.pill, .dot, .bar > span):is(.not_mounted, .no_data) { background: var(--muted); }
@@ -217,7 +212,7 @@ code { font-size: 0.85em; }
   -webkit-user-select: none; user-select: none;
 }
 .tabbar a svg { width: 26px; height: 26px; }
-.tabbar a[aria-current='page'] { color: var(--text); }
+.tabbar a[aria-current='page'] { color: var(--accent); }
 .tabbar a:active { opacity: 0.6; }
 
 footer { margin-top: 8px; display: flex; justify-content: center; }
