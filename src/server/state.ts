@@ -1,12 +1,13 @@
 import 'server-only'
 import { and, asc, eq, gte, inArray } from 'drizzle-orm'
-import { defaultRules, waxConfig } from '@/config'
-import { deriveChainState } from '@/core/chain'
-import type { ActivityInput, ChainState, ComponentEventInput } from '@/core/types'
-import { db, schema } from '@/db'
+import { waxConfig } from '@/config'
+import { deriveComponentState } from '@/core/component'
+import type { ActivityInput, ComponentEventInput, ComponentState, RuleInput } from '@/core/types'
+import { db, schema, type ComponentType } from '@/db'
 
 type Activity = typeof schema.activities.$inferSelect
 type Event = typeof schema.events.$inferSelect
+type Rule = typeof schema.rules.$inferSelect
 
 export function toActivityInput(a: Activity): ActivityInput {
   return {
@@ -25,7 +26,7 @@ export function toEventInput(e: Event, gearByBikeId: Map<string, string>): Compo
   switch (e.type) {
     case 'mounted': {
       const gearId = e.bikeId ? gearByBikeId.get(e.bikeId) : undefined
-      return gearId ? { id: e.id, type: 'mounted', occurredAt: e.occurredAt, gearId } : null
+      return gearId ? { id: e.id, type: 'mounted', occurredAt: e.occurredAt, gearId, initialKm: e.value ?? undefined } : null
     }
     case 'measured':
       return { id: e.id, type: 'measured', occurredAt: e.occurredAt, value: e.value ?? 0 }
@@ -34,19 +35,27 @@ export function toEventInput(e: Event, gearByBikeId: Map<string, string>): Compo
   }
 }
 
-export interface ChainView {
-  componentId: string
-  label: string
-  unknownHistory: boolean
-  state: ChainState
+function toRuleInput(r: Rule): RuleInput | null {
+  if (r.type !== 'wax_km' && r.type !== 'km' && r.type !== 'measurement') return null
+  return { id: r.id, type: r.type, threshold: r.threshold, warningMargin: r.warningMargin, resetOn: r.resetOn }
 }
 
-/** Laadt alle kettingen van een atleet en leidt hun staat af. */
-export async function loadChainStates(athleteId: number, now = new Date()): Promise<ChainView[]> {
+export interface ComponentView {
+  id: string
+  type: ComponentType
+  label: string
+  unknownHistory: boolean
+  state: ComponentState
+  /** Alleen cassettes: aantal kettingen dat sinds de huidige montage op deze fiets zat (informatief). */
+  chainsOnCassette?: number
+}
+
+/** Laadt alle onderdelen van een atleet en leidt hun staat af. Afgedankte onderdelen tellen mee voor historie. */
+export async function loadComponentStates(athleteId: number, now = new Date()): Promise<ComponentView[]> {
   const d = db()
   const [bikes, comps] = await Promise.all([
     d.select().from(schema.bikes).where(eq(schema.bikes.athleteId, athleteId)),
-    d.select().from(schema.components).where(and(eq(schema.components.athleteId, athleteId), eq(schema.components.type, 'chain'))),
+    d.select().from(schema.components).where(eq(schema.components.athleteId, athleteId)),
   ])
   if (comps.length === 0) return []
   const ids = comps.map((c) => c.id)
@@ -61,27 +70,45 @@ export async function loadChainStates(athleteId: number, now = new Date()): Prom
   const gearByBikeId = new Map(bikes.map((b) => [b.id, b.gearId]))
   const activityInputs = acts.map(toActivityInput)
 
-  return comps.map((c) => {
-    const rule = rules.find((r) => r.componentId === c.id && r.type === 'wax_km')
+  const views: ComponentView[] = comps.map((c) => {
     const evs = events
       .filter((e) => e.componentId === c.id)
       .map((e) => toEventInput(e, gearByBikeId))
       .filter((e): e is ComponentEventInput => e !== null)
+    const ruleInputs = rules
+      .filter((r) => r.componentId === c.id)
+      .map(toRuleInput)
+      .filter((r): r is RuleInput => r !== null)
     return {
-      componentId: c.id,
+      id: c.id,
+      type: c.type,
       label: c.label,
       unknownHistory: c.unknownHistory,
-      state: deriveChainState(
-        evs,
-        activityInputs,
-        rule
-          ? { type: 'wax_km', threshold: rule.threshold, warningMargin: rule.warningMargin }
-          : defaultRules.chain,
-        waxConfig,
-        now,
-      ),
+      state: deriveComponentState(evs, activityInputs, ruleInputs, waxConfig, now),
     }
   })
+
+  // Kettingen per cassette: ketting-periodes op dezelfde fiets die overlappen met de huidige cassette-periode.
+  for (const v of views) {
+    if (v.type !== 'cassette' || !v.state.currentGearId) continue
+    const period = v.state.mountPeriods.at(-1)!
+    v.chainsOnCassette = views.filter(
+      (c) =>
+        c.type === 'chain' &&
+        c.state.mountPeriods.some(
+          (p) => p.gearId === period.gearId && (p.to === null || p.to.getTime() > period.from.getTime()),
+        ),
+    ).length
+  }
+  return views
+}
+
+/** Huidige onderdelen per gear_id, in vaste volgorde voor de UI. */
+export function componentsOnGear(views: ComponentView[], gearId: string): ComponentView[] {
+  const order: ComponentType[] = ['chain', 'cassette', 'chainring', 'wheelset', 'tyre_front', 'tyre_rear']
+  return views
+    .filter((v) => v.state.currentGearId === gearId)
+    .sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type))
 }
 
 /** Oudste moment waarvoor ritten nodig zijn (voor backfill). */

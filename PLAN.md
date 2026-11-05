@@ -70,3 +70,14 @@ Templates, meerdere componenten, `days`/`hours`-regels, wekelijkse garage-check 
 ## Aannames om te checken
 - Ritten zonder `gear_id` tellen niet mee en verschijnen als "ongekoppelde ritten". Klopt dat, of wil je een standaardfiets?
 - Een indoor-rit telt ×0,3 op de fiets van zijn `gear_id` (dus je racefiets op de trainer telt wel, maar licht).
+
+---
+
+# Fase 2a — ketting en cassette (gebouwd)
+- **Regels generiek**: elke regel heeft een type (`wax_km`, `km`, `measurement`) en een `reset_on`-event. Wax-km reset op `waxed`, de meetherinnering op `measured`; levensduur (`reset_on = null`) telt vanaf montage.
+- **Ketting**: wax 400 wax-km · meetherinnering elke 1.000 km (echte km) · slijtage via kettingmeter, waarschuwing 0,4%, vervangen 0,5% (directe push).
+- **Cassette**: alleen km (keuze gebruiker, wijkt af van CLAUDE.md "telt in kettingen"), standaard 20.000 km. Aantal kettingen op de cassette wordt informatief getoond.
+- **Slijtage in echte km**; metingen in fase 3 kalibreren de slijtage per wax-km.
+- **Vervangen** = `replaced`-event op het oude exemplaar + nieuw exemplaar met dezelfde drempels.
+- **Onboarding cassette**: montagedatum (met backfill) · km bekend (beginkm op het mounted-event) · geen idee (start op 0, gelabeld).
+- Nog niet: banden, sealant, templates, wekelijkse garage-check (daar horen meetherinnering en cassette-melding thuis).

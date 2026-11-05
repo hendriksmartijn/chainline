@@ -12,3 +12,4 @@ export function db() {
 }
 
 export { schema }
+export type { ComponentType } from './schema'

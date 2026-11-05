@@ -7,7 +7,7 @@ import { db, schema } from '@/db'
 import { getAthlete, listActivities, nearRateLimit, type StravaActivity } from '@/lib/strava'
 import { fetchRidePrecipitation } from '@/lib/weather'
 import { deliverNotifications } from './push'
-import { loadChainStates, toActivityInput } from './state'
+import { loadComponentStates, toActivityInput } from './state'
 
 /** Fietsen uit Strava overnemen (nieuw → toevoegen, naam/retired bijwerken). */
 export async function syncBikes(athleteId: number) {
@@ -83,11 +83,11 @@ export async function deleteActivity(athleteId: number, activityId: number) {
  * `trigger` = een net binnengekomen rit (voor de natte-rit-melding).
  */
 export async function evaluateAndNotify(athleteId: number, trigger?: typeof schema.activities.$inferSelect) {
-  const chains = await loadChainStates(athleteId)
+  const comps = await loadComponentStates(athleteId)
   const t = trigger ? { activityId: String(trigger.id), cls: classifyActivity(toActivityInput(trigger), waxConfig) } : undefined
-  for (const c of chains) {
+  for (const c of comps) {
     const candidates = decideNotifications(c.state, t)
-    await deliverNotifications(athleteId, c.componentId, c.label, candidates, c.state)
+    if (candidates.length) await deliverNotifications(athleteId, c, candidates)
   }
 }
 

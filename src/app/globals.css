@@ -54,3 +54,18 @@ label { display: grid; gap: 6px; font-size: 0.9rem; }
 .strava-btn { background: var(--strava); color: #fff; border-radius: 6px; padding: 12px 18px; font-weight: 700; text-decoration: none; display: inline-block; }
 .notice { border-left: 3px solid var(--accent); padding: 8px 12px; background: var(--card); border-radius: 6px; }
 footer { margin-top: 32px; display: flex; justify-content: space-between; align-items: center; }
+.component + .component { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.status-line { text-decoration: none; display: block; }
+.small-line { font-size: 1.05rem; }
+.small { font-size: 0.875rem; margin: 8px 0 0; }
+.wear { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--muted); }
+.dot.ok { background: var(--ok); } .dot.warning { background: var(--warn); } .dot.due { background: var(--due); } .dot.no_data { background: var(--muted); }
+.pill.no_data { background: var(--muted); }
+.bar > span.no_data { background: var(--muted); }
+.segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 4px; }
+.segmented button { background: transparent; color: var(--text); padding: 8px 4px; font-size: 0.85rem; border-radius: 7px; }
+.segmented button.active { background: var(--text); color: var(--bg); }
+input[type='number'] { font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; }
+details > summary { cursor: pointer; font-weight: 600; }
+.rule-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; }

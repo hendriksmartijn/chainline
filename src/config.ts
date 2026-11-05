@@ -23,8 +23,26 @@ export const waxConfig: WaxConfig = {
   indoorSportTypes: ['VirtualRide'],
 }
 
-export const defaultRules = {
-  chain: { type: 'wax_km' as const, threshold: 400, warningMargin: 100 },
+export interface RuleDefault {
+  type: 'wax_km' | 'km' | 'measurement'
+  threshold: number
+  warningMargin: number
+  resetOn: 'waxed' | 'measured' | null
+}
+
+/**
+ * Standaardregels per onderdeeltype. Per onderdeel aan te passen in de app.
+ * - Ketting: wax-km sinds laatste wax, meetherinnering in echte km sinds laatste meting,
+ *   slijtage via kettingmeter (0,5% = vervangen; gangbare grens voor 11/12-speed).
+ * - Cassette: echte km sinds montage. 20.000 km is een startwaarde, geen norm: stel zelf bij.
+ */
+export const defaultRules: Record<'chain' | 'cassette', RuleDefault[]> = {
+  chain: [
+    { type: 'wax_km', threshold: 400, warningMargin: 100, resetOn: 'waxed' },
+    { type: 'measurement', threshold: 0.5, warningMargin: 0.1, resetOn: null },
+    { type: 'km', threshold: 1000, warningMargin: 100, resetOn: 'measured' },
+  ],
+  cassette: [{ type: 'km', threshold: 20000, warningMargin: 2000, resetOn: null }],
 }
 
 export const weatherConfig = {

@@ -1,12 +1,13 @@
 import { and, eq, gte, isNull, sql } from 'drizzle-orm'
 import { setupChain, resync } from '@/app/actions'
-import { ChainCard } from '@/components/ChainCard'
+import { CassetteSetupForm } from '@/components/CassetteSetupForm'
+import { ComponentSummary } from '@/components/ComponentSummary'
 import { LocalDateInput } from '@/components/LocalDateInput'
 import { PushSetup } from '@/components/PushSetup'
 import { db, schema } from '@/db'
 import { env } from '@/env'
 import { getSessionAthleteId } from '@/lib/session'
-import { loadChainStates, oldestRelevantDate } from '@/server/state'
+import { componentsOnGear, loadComponentStates, oldestRelevantDate } from '@/server/state'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,9 +69,9 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
     )
   }
 
-  const [bikes, chains, pendingBackfill, since] = await Promise.all([
+  const [bikes, comps, pendingBackfill, since] = await Promise.all([
     d.select().from(schema.bikes).where(eq(schema.bikes.athleteId, athleteId)).orderBy(schema.bikes.name),
-    loadChainStates(athleteId),
+    loadComponentStates(athleteId),
     d
       .select({ n: sql<number>`count(*)::int` })
       .from(schema.jobs)
@@ -85,7 +86,7 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
         .where(and(eq(schema.activities.athleteId, athleteId), isNull(schema.activities.gearId), gte(schema.activities.startDate, since)))
     : [{ n: 0 }]
 
-  const visibleBikes = bikes.filter((b) => !b.retired || chains.some((c) => c.state.currentGearId === b.gearId))
+  const visibleBikes = bikes.filter((b) => !b.retired || componentsOnGear(comps, b.gearId).length > 0)
 
   return (
     <main className="stack">
@@ -106,18 +107,28 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
       )}
 
       {visibleBikes.map((bike) => {
-        const chain = chains.find((c) => c.state.currentGearId === bike.gearId)
+        const onBike = componentsOnGear(comps, bike.gearId)
+        const hasChain = onBike.some((c) => c.type === 'chain')
+        const hasCassette = onBike.some((c) => c.type === 'cassette')
         return (
           <section key={bike.id} className="card">
             <h2>{bike.name}</h2>
-            {chain ? (
-              <ChainCard chain={chain} backfilling={backfilling} />
+            {hasChain ? (
+              onBike.map((c) => <ComponentSummary key={c.id} comp={c} backfilling={backfilling} />)
             ) : (
               <form action={setupChain} className="stack" style={{ marginTop: 12 }}>
                 <input type="hidden" name="bikeId" value={bike.id} />
                 <LocalDateInput label="Wanneer heb je je ketting laatst gewaxt?" />
                 <button type="submit">Start met tellen</button>
               </form>
+            )}
+            {hasChain && !hasCassette && (
+              <details style={{ marginTop: 16 }}>
+                <summary>Cassette toevoegen</summary>
+                <div style={{ marginTop: 12 }}>
+                  <CassetteSetupForm bikeId={bike.id} />
+                </div>
+              </details>
             )}
           </section>
         )

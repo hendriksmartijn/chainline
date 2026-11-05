@@ -76,7 +76,7 @@ export const events = pgTable(
     bikeId: uuid('bike_id').references(() => bikes.id, { onDelete: 'set null' }),
     /** Mag in het verleden liggen: alles is met terugwerkende kracht te corrigeren. */
     occurredAt: ts('occurred_at').notNull(),
-    /** Bijv. slijtage in % bij measured. */
+    /** Slijtage in % bij measured; km die er al op zaten bij mounted ("km bekend"). */
     value: real('value'),
     source: text('source').$type<'user' | 'push' | 'onboarding'>().notNull().default('user'),
     createdAt: createdAt(),
@@ -95,7 +95,14 @@ export const rules = pgTable('rules', {
   type: text('type').$type<RuleType>().notNull(),
   threshold: real('threshold').notNull(),
   warningMargin: real('warning_margin').notNull(),
+  /**
+   * Welk event de teller op 0 zet: 'waxed' voor wax-km, 'measured' voor de meetherinnering.
+   * null = telt vanaf montage (levensduur van het onderdeel).
+   */
+  resetOn: text('reset_on').$type<ResetEvent>(),
 })
+
+export type ResetEvent = 'waxed' | 'measured' | 'sealant_refilled'
 
 export type WeatherClass = 'dry' | 'wet' | 'indoor' | 'unknown'
 
@@ -135,7 +142,7 @@ export const pushSubscriptions = pgTable('push_subscriptions', {
   createdAt: createdAt(),
 })
 
-export type NotificationKind = 'wax_warning' | 'wax_due' | 'wet_ride'
+export type NotificationKind = 'wax_warning' | 'wax_due' | 'wet_ride' | 'chain_worn'
 
 /** Dedupe van pushes: één per component + soort + cyclus (laatste wax-event, of rit-id). */
 export const notificationsSent = pgTable(

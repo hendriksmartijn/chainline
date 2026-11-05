@@ -4,6 +4,7 @@ import webpush from 'web-push'
 import { suppressedBy, type NotificationCandidate } from '@/core/notifications'
 import { db, schema } from '@/db'
 import { env } from '@/env'
+import type { ComponentView } from './state'
 
 let configured = false
 function setup() {
@@ -50,15 +51,24 @@ export async function sendPush(athleteId: number, payload: PushPayload): Promise
   return delivered
 }
 
-function payloadFor(c: NotificationCandidate, componentId: string, label: string, waxKm: number, threshold: number): PushPayload {
-  const stand = `${Math.round(waxKm)} / ${threshold} wax-km`
+function fmtNum(n: number, digits = 0) {
+  return n.toLocaleString('nl-NL', { maximumFractionDigits: digits, minimumFractionDigits: digits })
+}
+
+function payloadFor(c: NotificationCandidate, comp: ComponentView): PushPayload {
+  const rule = comp.state.rules.find((r) => r.ruleId === c.ruleId)
+  const value = rule?.value ?? 0
+  const stand = rule ? `${fmtNum(value)} / ${fmtNum(rule.threshold)} wax-km` : ''
+  const id = comp.id
   switch (c.kind) {
     case 'wax_due':
-      return { title: `${label}: tijd om te waxen`, body: `${stand}. Wax nu om slijtage te voorkomen.`, tag: `wax-${componentId}`, url: `/wax/${componentId}`, componentId, waxAction: true }
+      return { title: `${comp.label}: tijd om te waxen`, body: `${stand}. Wax nu om slijtage te voorkomen.`, tag: `wax-${id}`, url: `/wax/${id}`, componentId: id, waxAction: true }
     case 'wax_warning':
-      return { title: `${label}: bijna tijd om te waxen`, body: `${stand}. Plan je volgende waxbeurt.`, tag: `wax-${componentId}`, url: `/wax/${componentId}`, componentId, waxAction: true }
+      return { title: `${comp.label}: bijna tijd om te waxen`, body: `${stand}. Plan je volgende waxbeurt.`, tag: `wax-${id}`, url: `/wax/${id}`, componentId: id, waxAction: true }
     case 'wet_ride':
-      return { title: 'Na natte rit: check je ketting', body: `Natte rit telt ×3. ${label} staat nu op ${stand}.`, tag: `wet-${componentId}`, url: `/wax/${componentId}`, componentId, waxAction: true }
+      return { title: 'Na natte rit: check je ketting', body: `Natte rit telt ×3. ${comp.label} staat nu op ${stand}.`, tag: `wet-${id}`, url: `/wax/${id}`, componentId: id, waxAction: true }
+    case 'chain_worn':
+      return { title: `${comp.label} versleten: nu vervangen`, body: `Gemeten ${fmtNum(value, 2)}%. Vervang hem nu, anders gaat je cassette mee.`, tag: `wear-${id}`, url: `/onderdeel/${id}` }
   }
 }
 
@@ -66,13 +76,8 @@ function payloadFor(c: NotificationCandidate, componentId: string, label: string
  * Verstuurt kandidaten die nog niet verstuurd zijn. De unique index op
  * (component, kind, cycle) maakt dit veilig bij dubbele webhooks of retries.
  */
-export async function deliverNotifications(
-  athleteId: number,
-  componentId: string,
-  label: string,
-  candidates: NotificationCandidate[],
-  stand: { waxKm: number; threshold: number },
-) {
+export async function deliverNotifications(athleteId: number, comp: ComponentView, candidates: NotificationCandidate[]) {
+  const componentId = comp.id
   // Zonder abonnement niets als 'verstuurd' markeren, anders mis je de melding na het aanzetten van push.
   const [sub] = await db().select({ id: schema.pushSubscriptions.id }).from(schema.pushSubscriptions).where(eq(schema.pushSubscriptions.athleteId, athleteId)).limit(1)
   if (!sub) return
@@ -92,6 +97,6 @@ export async function deliverNotifications(
       .onConflictDoNothing()
       .returning({ id: schema.notificationsSent.id })
     if (inserted.length === 0) continue // al eerder verstuurd
-    await sendPush(athleteId, payloadFor(c, componentId, label, stand.waxKm, stand.threshold))
+    await sendPush(athleteId, payloadFor(c, comp))
   }
 }
