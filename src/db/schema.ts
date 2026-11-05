@@ -24,8 +24,17 @@ export const athletes = pgTable('athletes', {
   refreshTokenEnc: text('refresh_token_enc').notNull(),
   expiresAt: ts('expires_at').notNull(),
   scope: text('scope').notNull(),
+  /** Eigen standaarddrempels per onderdeeltype; null = de defaults uit src/config.ts. */
+  ruleDefaults: jsonb('rule_defaults').$type<Partial<Record<'chain' | 'cassette', RuleDefaultRow[]>>>(),
   createdAt: createdAt(),
 })
+
+export interface RuleDefaultRow {
+  type: 'wax_km' | 'km' | 'measurement'
+  threshold: number
+  warningMargin: number
+  resetOn: 'waxed' | 'measured' | null
+}
 
 export const bikes = pgTable(
   'bikes',

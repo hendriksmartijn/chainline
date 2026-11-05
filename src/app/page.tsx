@@ -20,15 +20,10 @@ const ERRORS: Record<string, string> = {
   atleet: 'Er ging iets mis bij het koppelen. Probeer het opnieuw.',
 }
 
-function Footer({ loggedIn }: { loggedIn: boolean }) {
+function Footer(_: { loggedIn: boolean }) {
   return (
     <footer className="muted">
       <span>Powered by Strava</span>
-      {loggedIn && (
-        <form action="/api/auth/logout" method="post">
-          <button className="secondary" type="submit">Uitloggen</button>
-        </form>
-      )}
     </footer>
   )
 }

@@ -66,7 +66,7 @@ export default async function ComponentPage({ params, searchParams }: PageProps<
             {r.since && <p className="muted small">{r.type === 'measurement' ? `Gemeten ${fmtDate(r.since)}` : `Geteld vanaf ${fmtDate(r.since)}`}</p>}
             {!retired && (
               <details style={{ marginTop: 12 }}>
-                <summary className="muted small">Drempel aanpassen</summary>
+                <summary className="muted small">Afwijkende drempel voor alleen dit onderdeel</summary>
                 <form action={updateRule} className="rule-form" style={{ marginTop: 8 }}>
                   <input type="hidden" name="ruleId" value={r.ruleId} />
                   <label>
@@ -79,6 +79,9 @@ export default async function ComponentPage({ params, searchParams }: PageProps<
                   </label>
                   <button type="submit" className="secondary">Opslaan</button>
                 </form>
+                <p className="muted small" style={{ marginTop: 8 }}>
+                  Voor al je fietsen tegelijk: <a href="/instellingen">Instellingen</a>.
+                </p>
               </details>
             )}
           </section>

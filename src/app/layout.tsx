@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { Header } from '@/components/Header'
 import { SwRegister } from '@/components/SwRegister'
 import './globals.css'
 
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="nl">
       <body>
+        <Header />
         {children}
         <SwRegister />
       </body>

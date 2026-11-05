@@ -1,0 +1,1 @@
+ALTER TABLE "athletes" ADD COLUMN "rule_defaults" jsonb;

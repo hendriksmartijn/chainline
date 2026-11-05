@@ -69,3 +69,9 @@ footer { margin-top: 32px; display: flex; justify-content: space-between; align-
 input[type='number'] { font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; }
 details > summary { cursor: pointer; font-weight: 600; }
 .rule-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+.topbar .brand { font-weight: 750; text-decoration: none; letter-spacing: -0.01em; }
+.topbar nav { display: flex; gap: 4px; }
+.topbar nav a { text-decoration: none; font-size: 0.9rem; padding: 6px 10px; border-radius: 8px; color: var(--muted); }
+.topbar nav a[aria-current='page'] { color: var(--text); background: var(--card); border: 1px solid var(--line); }

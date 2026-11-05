@@ -1,8 +1,9 @@
 import 'server-only'
 import { randomUUID } from 'node:crypto'
 import { and, eq } from 'drizzle-orm'
-import { defaultRules, type RuleDefault } from '@/config'
+import type { RuleDefault } from '@/config'
 import { db, schema, type ComponentType } from '@/db'
+import { getRuleDefaults } from './settings'
 
 export const COMPONENT_LABELS: Partial<Record<ComponentType, string>> = { chain: 'Ketting', cassette: 'Cassette' }
 
@@ -39,6 +40,7 @@ export async function createMountedComponent(opts: {
 }) {
   const componentId = randomUUID()
   const { athleteId, bikeId, type } = opts
+  const rules = opts.rules ?? (await getRuleDefaults(athleteId))[type]
   const mountedAt = clampToNow(opts.mountedAt)
   const source = opts.source ?? 'user'
   const events: (typeof schema.events.$inferInsert)[] = [
@@ -48,7 +50,7 @@ export async function createMountedComponent(opts: {
 
   await db().batch([
     db().insert(schema.components).values({ id: componentId, athleteId, type, label: COMPONENT_LABELS[type] ?? type, unknownHistory: opts.unknownHistory }),
-    db().insert(schema.rules).values((opts.rules ?? defaultRules[type]).map((r) => ({ componentId, ...r }))),
+    db().insert(schema.rules).values(rules.map((r) => ({ componentId, ...r }))),
     db().insert(schema.events).values(events),
   ])
   return componentId
