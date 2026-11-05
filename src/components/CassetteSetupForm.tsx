@@ -13,7 +13,7 @@ export function CassetteSetupForm({ bikeId }: { bikeId: string }) {
       <div className="segmented" role="radiogroup" aria-label="Wat weet je van je cassette?">
         {(
           [
-            ['date', 'Montagedatum'],
+            ['date', 'Datum'],
             ['km', 'Km bekend'],
             ['unknown', 'Geen idee'],
           ] as const

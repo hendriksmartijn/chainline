@@ -31,6 +31,7 @@ export default async function WaxPage({ params }: PageProps<'/wax/[componentId]'
 
   return (
     <main className="stack">
+      <a href="/" className="back">‹ Garage</a>
       <div>
         <h1>{comp.label}{bike ? ` · ${bike.name}` : ''}</h1>
         {wax && <p className="muted">Nu {nl(wax.value ?? 0)} / {nl(wax.threshold)} wax-km</p>}
@@ -50,8 +51,6 @@ export default async function WaxPage({ params }: PageProps<'/wax/[componentId]'
           <button type="submit" className="secondary">Opslaan</button>
         </form>
       </details>
-
-      <a href="/" className="muted">← Terug naar garage</a>
     </main>
   )
 }

@@ -40,6 +40,7 @@ export default async function ComponentPage({ params, searchParams }: PageProps<
 
   return (
     <main className="stack">
+      <a href="/" className="back">‹ Garage</a>
       <div>
         <h1>{comp.label}{bike ? ` · ${bike.name}` : ''}</h1>
         <p className="muted">
@@ -142,8 +143,6 @@ export default async function ComponentPage({ params, searchParams }: PageProps<
           ))}
         </ul>
       </section>
-
-      <a href="/" className="muted">← Terug naar garage</a>
     </main>
   )
 }

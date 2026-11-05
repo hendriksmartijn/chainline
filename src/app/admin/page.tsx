@@ -56,8 +56,6 @@ export default async function Admin({ searchParams }: PageProps<'/admin'>) {
           )
         )}
       </section>
-
-      <a href="/" className="muted">← Terug naar garage</a>
     </main>
   )
 }
