@@ -215,3 +215,21 @@ describe('measurement-regel', () => {
     expect(s.value).toBe(0.35)
   })
 })
+
+describe('countIndoor', () => {
+  const cassette: RuleInput = { id: 'c', type: 'km', threshold: 20000, warningMargin: 2000, resetOn: null, countIndoor: false }
+  const rides = [
+    ride({ km: 100, at: '2026-10-02T08:00:00Z' }),
+    ride({ km: 40, at: '2026-10-03T18:00:00Z', sportType: 'VirtualRide' }),
+    ride({ km: 30, at: '2026-10-04T18:00:00Z', trainer: true }),
+  ]
+  it('cassette: indoor (Zwift en trainer-flag) telt niet mee', () => {
+    expect(rule([mounted('2026-10-01T00:00:00Z')], rides, cassette).value).toBe(100)
+  })
+  it('ketting-levensduur telt indoor wel mee (standaard)', () => {
+    expect(rule([mounted('2026-10-01T00:00:00Z')], rides, lifetime).value).toBe(170)
+  })
+  it('wax blijft ×0,3 voor indoor', () => {
+    expect(rule([mounted('2026-10-01T00:00:00Z'), waxed('2026-10-01T00:00:00Z')], rides, wax).value).toBeCloseTo(100 + 21)
+  })
+})

@@ -35,6 +35,8 @@ export interface RuleInput {
   warningMargin: number
   /** Event dat de teller op 0 zet; null = vanaf (eerste) montage. */
   resetOn: ResetEvent | null
+  /** false = indoor-ritten (trainer, VirtualRide) tellen niet mee. Standaard true. */
+  countIndoor?: boolean
 }
 
 /** no_data: meetregel zonder meting. not_mounted: zit nergens op of is vervangen. */
@@ -53,6 +55,7 @@ export interface RuleState {
   ruleId: string
   type: RuleInput['type']
   resetOn: ResetEvent | null
+  countIndoor: boolean
   status: RuleStatus
   /** wax-km, km of % (meting). null = geen meting. */
   value: number | null

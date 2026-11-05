@@ -42,7 +42,7 @@ export function deriveComponentState(
 
   const ruleStates = rules.map((rule): RuleState => {
     const warningAt = Math.max(0, rule.threshold - rule.warningMargin)
-    const base = { ruleId: rule.id, type: rule.type, resetOn: rule.resetOn, threshold: rule.threshold, warningAt }
+    const base = { ruleId: rule.id, type: rule.type, resetOn: rule.resetOn, countIndoor: rule.countIndoor !== false, threshold: rule.threshold, warningAt }
 
     if (rule.type === 'measurement') {
       const m = [...past].reverse().find((e) => e.type === 'measured')
@@ -71,6 +71,7 @@ export function deriveComponentState(
         if (t < since.getTime() || t > now.getTime()) continue
         if (!isInPeriods(a.gearId, a.startDate, periods)) continue
         const r = waxKmFor(a, config)
+        if (r.cls === 'indoor' && rule.countIndoor === false) continue
         value += rule.type === 'wax_km' ? r.waxKm : r.km
         breakdown[r.cls].rides += 1
         breakdown[r.cls].km += r.km

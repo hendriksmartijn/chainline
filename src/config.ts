@@ -28,6 +28,8 @@ export interface RuleDefault {
   threshold: number
   warningMargin: number
   resetOn: 'waxed' | 'measured' | null
+  /** Standaard true. */
+  countIndoor?: boolean
 }
 
 /**
@@ -42,7 +44,8 @@ export const defaultRules: Record<'chain' | 'cassette', RuleDefault[]> = {
     { type: 'measurement', threshold: 0.5, warningMargin: 0.1, resetOn: null },
     { type: 'km', threshold: 1000, warningMargin: 100, resetOn: 'measured' },
   ],
-  cassette: [{ type: 'km', threshold: 20000, warningMargin: 2000, resetOn: null }],
+  // Indoor telt niet: op een direct-drive trainer draait de cassette van de trainer.
+  cassette: [{ type: 'km', threshold: 20000, warningMargin: 2000, resetOn: null, countIndoor: false }],
 }
 
 export const weatherConfig = {

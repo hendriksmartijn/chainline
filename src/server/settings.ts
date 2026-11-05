@@ -15,7 +15,7 @@ export async function getRuleDefaults(athleteId: number): Promise<RuleDefaults> 
   const [row] = await db().select({ ruleDefaults: schema.athletes.ruleDefaults }).from(schema.athletes).where(eq(schema.athletes.id, athleteId))
   const custom = row?.ruleDefaults ?? {}
   const merge = (type: ConfigurableType) =>
-    defaultRules[type].map((d) => custom[type]?.find((c) => ruleKey(c) === ruleKey(d)) ?? d)
+    defaultRules[type].map((d) => ({ ...d, ...custom[type]?.find((c) => ruleKey(c) === ruleKey(d)) }))
   return { chain: merge('chain'), cassette: merge('cassette') }
 }
 
@@ -44,14 +44,15 @@ export async function saveRuleDefaults(athleteId: number, next: RuleDefaults) {
       const old = prev[comp.type].find((d) => ruleKey(d) === key)
       const neu = next[comp.type].find((d) => ruleKey(d) === key)
       if (!old || !neu) continue
-      if (same(neu.threshold, rule.threshold) && same(neu.warningMargin, rule.warningMargin)) continue
-      if (!same(rule.threshold, old.threshold) || !same(rule.warningMargin, old.warningMargin)) {
+      const indoor = (r: { countIndoor?: boolean }) => r.countIndoor !== false
+      if (same(neu.threshold, rule.threshold) && same(neu.warningMargin, rule.warningMargin) && indoor(neu) === rule.countIndoor) continue
+      if (!same(rule.threshold, old.threshold) || !same(rule.warningMargin, old.warningMargin) || indoor(old) !== rule.countIndoor) {
         kept++
         continue
       }
       await db()
         .update(schema.rules)
-        .set({ threshold: neu.threshold, warningMargin: neu.warningMargin })
+        .set({ threshold: neu.threshold, warningMargin: neu.warningMargin, countIndoor: indoor(neu) })
         .where(and(eq(schema.rules.id, rule.id), eq(schema.rules.componentId, comp.id)))
       updated++
     }

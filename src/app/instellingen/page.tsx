@@ -56,11 +56,19 @@ export default async function Settings({ searchParams }: PageProps<'/instellinge
                     </label>,
                   )
                 }
+                if (f.indoorToggle) {
+                  rows.push(
+                    <label key={fieldName(f, 'indoor')} className="list-row toggle-row" style={{ color: 'var(--text)', display: 'flex' }}>
+                      <span className="label">{f.indoorToggle.label}</span>
+                      <input type="checkbox" role="switch" className="switch" name={fieldName(f, 'indoor')} defaultChecked={rule.countIndoor !== false} />
+                    </label>,
+                  )
+                }
                 return rows
               })}
             </div>
             <p className="group-foot">
-              {SETTING_FIELDS.filter((f) => f.componentType === g.type).map((f) => f.help).join(' ')}
+              {SETTING_FIELDS.filter((f) => f.componentType === g.type).map((f) => [f.help, f.indoorToggle?.help].filter(Boolean).join(' ')).join(' ')}
             </p>
           </div>
         ))}

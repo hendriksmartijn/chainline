@@ -28,6 +28,7 @@ export async function saveSettings(formData: FormData) {
       if (!m.success || m.data >= t.data) redirect(`/instellingen?fout=${encodeURIComponent(f.title)}`)
       rule.warningMargin = m.data
     }
+    if (f.indoorToggle) rule.countIndoor = formData.get(fieldName(f, 'indoor')) === 'on'
   }
 
   const { updated, kept } = await saveRuleDefaults(athleteId, next)

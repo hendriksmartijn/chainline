@@ -120,7 +120,7 @@ export async function replaceComponent(formData: FormData) {
     mountedAt: at,
     unknownHistory: false,
     waxedAt: old.type === 'chain' && prewaxed ? at : undefined,
-    rules: oldRules.map((r) => ({ type: r.type as 'wax_km' | 'km' | 'measurement', threshold: r.threshold, warningMargin: r.warningMargin, resetOn: r.resetOn as 'waxed' | 'measured' | null })),
+    rules: oldRules.map((r) => ({ type: r.type as 'wax_km' | 'km' | 'measurement', threshold: r.threshold, warningMargin: r.warningMargin, resetOn: r.resetOn as 'waxed' | 'measured' | null, countIndoor: r.countIndoor })),
   })
   revalidatePath('/')
   redirect(`/onderdeel/${newId}?vervangen=1`)

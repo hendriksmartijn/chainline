@@ -10,6 +10,8 @@ export interface SettingField {
   unit: string
   step: string
   max: number
+  /** Toon een schakelaar "Indoor meetellen". */
+  indoorToggle?: { label: string; help: string }
 }
 
 export const SETTING_FIELDS: SettingField[] = [
@@ -35,8 +37,9 @@ export const SETTING_FIELDS: SettingField[] = [
     componentType: 'cassette', type: 'km', resetOn: null,
     title: 'Cassette vervangen',
     help: 'Levensduur in echte km sinds montage.',
+    indoorToggle: { label: 'Indoor meetellen', help: 'Uit bij een direct-drive trainer (zoals Tacx Neo/Flux): daar draait de cassette van de trainer. Aan bij een wheel-on trainer.' },
     thresholdLabel: 'Vervangen na', marginLabel: 'Waarschuwing vooraf', unit: 'km', step: '500', max: 200000,
   },
 ]
 
-export const fieldName = (f: SettingField, part: 'threshold' | 'margin') => `${f.componentType}.${f.type}.${f.resetOn ?? 'mount'}.${part}`
+export const fieldName = (f: SettingField, part: 'threshold' | 'margin' | 'indoor') => `${f.componentType}.${f.type}.${f.resetOn ?? 'mount'}.${part}`

@@ -216,3 +216,16 @@ code { font-size: 0.85em; }
 .tabbar a:active { opacity: 0.6; }
 
 footer { margin-top: 8px; display: flex; justify-content: center; }
+
+/* ---- iOS-schakelaar ---- */
+input.switch {
+  -webkit-appearance: none; appearance: none; flex: 0 0 auto;
+  width: 51px; height: 31px; border-radius: 999px; position: relative; cursor: pointer;
+  background: var(--card-2); transition: background 0.2s ease; margin: 0;
+}
+input.switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%;
+  background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25); transition: transform 0.2s ease;
+}
+input.switch:checked { background: var(--accent); }
+input.switch:checked::after { transform: translateX(20px); }

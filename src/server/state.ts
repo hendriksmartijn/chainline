@@ -37,7 +37,7 @@ export function toEventInput(e: Event, gearByBikeId: Map<string, string>): Compo
 
 function toRuleInput(r: Rule): RuleInput | null {
   if (r.type !== 'wax_km' && r.type !== 'km' && r.type !== 'measurement') return null
-  return { id: r.id, type: r.type, threshold: r.threshold, warningMargin: r.warningMargin, resetOn: r.resetOn }
+  return { id: r.id, type: r.type, threshold: r.threshold, warningMargin: r.warningMargin, resetOn: r.resetOn, countIndoor: r.countIndoor }
 }
 
 export interface ComponentView {

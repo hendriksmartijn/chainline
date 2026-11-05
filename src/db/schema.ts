@@ -34,6 +34,7 @@ export interface RuleDefaultRow {
   threshold: number
   warningMargin: number
   resetOn: 'waxed' | 'measured' | null
+  countIndoor?: boolean
 }
 
 export const bikes = pgTable(
@@ -109,6 +110,11 @@ export const rules = pgTable('rules', {
    * null = telt vanaf montage (levensduur van het onderdeel).
    */
   resetOn: text('reset_on').$type<ResetEvent>(),
+  /**
+   * Tellen indoor-ritten mee? Nee voor de cassette: op een direct-drive trainer
+   * draait de cassette van de trainer, niet die van de fiets. De ketting slijt wel.
+   */
+  countIndoor: boolean('count_indoor').notNull().default(true),
 })
 
 export type ResetEvent = 'waxed' | 'measured' | 'sealant_refilled'

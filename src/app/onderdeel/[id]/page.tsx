@@ -68,6 +68,7 @@ export default async function ComponentPage({ params, searchParams }: PageProps<
           <p className="of">
             van {nl(main.threshold, mainMeta.digits)} {mainMeta.unit}
             {main.since && ` · sinds ${fmtDate(main.since)}`}
+            {main.type === 'km' && !main.countIndoor && ' · indoor telt niet mee'}
           </p>
           <div className="bar" aria-hidden>
             <span className={main.status} style={{ width: `${Math.min(100, ((main.value ?? 0) / main.threshold) * 100)}%` }} />
