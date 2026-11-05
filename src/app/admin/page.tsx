@@ -24,7 +24,10 @@ export default async function Admin({ searchParams }: PageProps<'/admin'>) {
 
   return (
     <main className="stack">
-      <h1>Beheer</h1>
+      <div>
+        <p className="eyebrow">Alleen voor jou</p>
+        <h1>Beheer</h1>
+      </div>
       {typeof sp.fout === 'string' && <div className="notice">Aanmelden mislukt: {sp.fout}</div>}
       {typeof sp.aangemeld === 'string' && <div className="notice">Webhook aangemeld (id {sp.aangemeld}).</div>}
 

@@ -1,7 +1,7 @@
 import { and, eq, gte, isNull, sql } from 'drizzle-orm'
 import { setupChain, resync } from '@/app/actions'
 import { CassetteSetupForm } from '@/components/CassetteSetupForm'
-import { ComponentSummary } from '@/components/ComponentSummary'
+import { BikeCard } from '@/components/BikeCard'
 import { LocalDateInput } from '@/components/LocalDateInput'
 import { PushSetup } from '@/components/PushSetup'
 import { db, schema } from '@/db'
@@ -85,10 +85,13 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
 
   return (
     <main className="stack">
-      <div>
-        <h1>Garage</h1>
-        <p className="muted">Hoi {athlete.firstname ?? 'renner'}.</p>
-      </div>
+      <header className="page-head">
+        <div className="avatar" aria-hidden>{(athlete.firstname ?? 'C').slice(0, 1).toUpperCase()}</div>
+        <div>
+          <p className="eyebrow">{new Intl.DateTimeFormat('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Amsterdam' }).format(new Date())}</p>
+          <h1>Garage</h1>
+        </div>
+      </header>
 
       {sp.gewaxt && <div className="notice">Gewaxt ✓ De teller begint weer bij 0.</div>}
       {sp.ververst && <div className="notice">Fietsen en ritten worden opnieuw opgehaald.</div>}
@@ -97,7 +100,7 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
 
       {visibleBikes.length === 0 && (
         <div className="card">
-          <p>Geen fietsen gevonden in je Strava-account. Voeg een fiets toe in Strava en ververs daarna.</p>
+          <p style={{ margin: 0 }}>Geen fietsen gevonden in je Strava-account. Voeg een fiets toe in Strava en ververs daarna.</p>
         </div>
       )}
 
@@ -106,26 +109,23 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
         const hasChain = onBike.some((c) => c.type === 'chain')
         const hasCassette = onBike.some((c) => c.type === 'cassette')
         return (
-          <section key={bike.id} className="card">
-            <h2>{bike.name}</h2>
-            {hasChain ? (
-              onBike.map((c) => <ComponentSummary key={c.id} comp={c} backfilling={backfilling} />)
-            ) : (
-              <form action={setupChain} className="stack" style={{ marginTop: 12 }}>
+          <BikeCard key={bike.id} name={bike.name} comps={onBike} backfilling={backfilling}>
+            {!hasChain && (
+              <form action={setupChain} className="stack" style={{ marginTop: 16 }}>
                 <input type="hidden" name="bikeId" value={bike.id} />
                 <LocalDateInput label="Wanneer heb je je ketting laatst gewaxt?" />
                 <button type="submit">Start met tellen</button>
               </form>
             )}
             {hasChain && !hasCassette && (
-              <details style={{ marginTop: 16 }}>
-                <summary>Cassette toevoegen</summary>
-                <div style={{ marginTop: 12 }}>
+              <details style={{ marginTop: 12 }}>
+                <summary className="muted">Cassette toevoegen</summary>
+                <div style={{ marginTop: 8 }}>
                   <CassetteSetupForm bikeId={bike.id} />
                 </div>
               </details>
             )}
-          </section>
+          </BikeCard>
         )
       })}
 
@@ -136,7 +136,7 @@ export default async function Home({ searchParams }: PageProps<'/'>) {
       )}
 
       <form action={resync}>
-        <button className="secondary" type="submit">Ververs vanuit Strava</button>
+        <button className="ghost" type="submit" style={{ width: '100%' }}>Ververs vanuit Strava</button>
       </form>
 
       <Footer loggedIn />

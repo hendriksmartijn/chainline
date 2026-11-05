@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { nl } from '@/lib/format'
 import { getSessionAthleteId } from '@/lib/session'
 import { getRuleDefaults, ruleKey } from '@/server/settings'
 import { saveSettings } from './actions'
@@ -13,59 +12,71 @@ export default async function Settings({ searchParams }: PageProps<'/instellinge
   const sp = await searchParams
   const defaults = await getRuleDefaults(athleteId)
   const kept = Number(sp.eigen ?? 0)
+  const groups = [
+    { title: 'Ketting', type: 'chain' as const },
+    { title: 'Cassette', type: 'cassette' as const },
+  ]
 
   return (
     <main className="stack">
       <div>
+        <p className="eyebrow">Drempels</p>
         <h1>Instellingen</h1>
-        <p className="muted">Je drempels gelden voor al je fietsen en voor nieuwe onderdelen. Alles wordt direct opnieuw berekend.</p>
       </div>
 
       {typeof sp.fout === 'string' && <div className="notice">Controleer &ldquo;{sp.fout}&rdquo;: de waarschuwing moet kleiner zijn dan de drempel.</div>}
       {sp.opgeslagen && (
         <div className="notice">
-          Opgeslagen.{' '}
-          {kept > 0 && <>{kept} {kept === 1 ? 'onderdeel heeft' : 'onderdelen hebben'} een eigen drempel en {kept === 1 ? 'is' : 'zijn'} niet aangepast (zie de onderdeelpagina).</>}
+          Opgeslagen en opnieuw berekend.
+          {kept > 0 && ` ${kept} ${kept === 1 ? 'onderdeel houdt zijn' : 'onderdelen houden hun'} eigen drempel.`}
         </div>
       )}
 
-      <form action={saveSettings} className="stack">
-        {SETTING_FIELDS.map((f) => {
-          const rule = defaults[f.componentType].find((r) => ruleKey(r) === ruleKey(f))
-          if (!rule) return null
-          return (
-            <section key={fieldName(f, 'threshold')} className="card stack">
-              <div>
-                <h2>{f.title}</h2>
-                <p className="muted small">{f.help}</p>
-              </div>
-              <div className={f.marginLabel ? 'two-col' : ''}>
-                <label>
-                  {f.thresholdLabel} ({f.unit})
-                  <input type="number" name={fieldName(f, 'threshold')} defaultValue={rule.threshold} step={f.step} min="0" max={f.max} required inputMode="decimal" />
-                </label>
-                {f.marginLabel && (
-                  <label>
-                    {f.marginLabel} ({f.unit})
-                    <input type="number" name={fieldName(f, 'margin')} defaultValue={rule.warningMargin} step={f.step} min="0" max={f.max} required inputMode="decimal" />
-                  </label>
-                )}
-              </div>
-              {f.marginLabel && (
-                <p className="muted small">Waarschuwing vanaf {nl(rule.threshold - rule.warningMargin, f.unit === '%' ? 2 : 0)} {f.unit}.</p>
-              )}
-            </section>
-          )
-        })}
+      <form action={saveSettings} className="stack" style={{ gap: 24 }}>
+        {groups.map((g) => (
+          <div key={g.type} className="group">
+            <p className="group-title">{g.title}</p>
+            <div className="list">
+              {SETTING_FIELDS.filter((f) => f.componentType === g.type).flatMap((f) => {
+                const rule = defaults[f.componentType].find((r) => ruleKey(r) === ruleKey(f))
+                if (!rule) return []
+                const rows = [
+                  <label key={fieldName(f, 'threshold')} className="list-row" style={{ color: 'var(--text)', display: 'flex' }}>
+                    <span className="label">{f.title}</span>
+                    <input type="number" name={fieldName(f, 'threshold')} defaultValue={rule.threshold} step={f.step} min="0" max={f.max} required inputMode="decimal" aria-label={`${f.title}: ${f.thresholdLabel}`} />
+                    <span className="unit">{f.unit}</span>
+                  </label>,
+                ]
+                if (f.marginLabel) {
+                  rows.push(
+                    <label key={fieldName(f, 'margin')} className="list-row" style={{ color: 'var(--text)', display: 'flex' }}>
+                      <span className="label muted" style={{ fontSize: 17 }}>Waarschuwing</span>
+                      <input type="number" name={fieldName(f, 'margin')} defaultValue={rule.warningMargin} step={f.step} min="0" max={f.max} required inputMode="decimal" aria-label={`${f.title}: ${f.marginLabel}`} />
+                      <span className="unit">{f.unit}</span>
+                    </label>,
+                  )
+                }
+                return rows
+              })}
+            </div>
+            <p className="group-foot">
+              {SETTING_FIELDS.filter((f) => f.componentType === g.type).map((f) => f.help).join(' ')}
+            </p>
+          </div>
+        ))}
         <button type="submit">Opslaan</button>
+        <p className="group-foot" style={{ marginTop: -12 }}>Geldt voor al je fietsen en nieuwe onderdelen. Een eigen drempel per onderdeel blijft staan.</p>
       </form>
 
-      <section className="card stack">
-        <h2>Account</h2>
-        <form action="/api/auth/logout" method="post">
-          <button className="secondary" type="submit">Uitloggen</button>
-        </form>
-      </section>
+      <div className="group">
+        <p className="group-title">Account</p>
+        <div className="list">
+          <form action="/api/auth/logout" method="post" className="list-row">
+            <span className="label">Strava gekoppeld</span>
+            <button type="submit" className="ghost" style={{ color: 'var(--due)' }}>Uitloggen</button>
+          </form>
+        </div>
+      </div>
     </main>
   )
 }
