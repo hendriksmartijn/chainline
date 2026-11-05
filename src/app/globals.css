@@ -100,7 +100,7 @@ main.stack { gap: 20px; }
 .hero { display: flex; align-items: center; gap: 16px; margin: 18px 0 4px; text-decoration: none; }
 .ring { width: 76px; height: 76px; flex: 0 0 auto; transform: rotate(-90deg); }
 .ring .track { stroke: var(--card-2); }
-.ring .fill { transition: stroke-dashoffset 0.6s ease; stroke: var(--accent); }
+.ring .fill { transition: stroke-dashoffset 0.6s ease; stroke: var(--ok); }
 .ring .fill.warning { stroke: var(--warn); } .ring .fill.due { stroke: var(--due); }
 .hero-label { font-size: 13px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
 .big { font-size: 40px; font-weight: 750; letter-spacing: -0.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
@@ -118,7 +118,7 @@ main.stack { gap: 20px; }
 /* ---- Statuslabels ---- */
 .pill { font-size: 13px; font-weight: 650; padding: 4px 10px; border-radius: 999px; color: #fff; white-space: nowrap; flex: 0 0 auto; }
 :is(.pill, .dot).ok { background: var(--ok); }
-.bar > span.ok { background: var(--accent); }
+.bar > span.ok { background: var(--ok); }
 :is(.pill, .dot, .bar > span).warning { background: var(--warn); }
 :is(.pill, .dot, .bar > span).due { background: var(--due); }
 :is(.pill, .dot, .bar > span):is(.not_mounted, .no_data) { background: var(--muted); }
